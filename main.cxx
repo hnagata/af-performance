@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 
 	af::timer tm = af::timer::start();
 	for (int i = 0; i < T; i++) {
-		ans[i] = sum(a);
+		ans[i] = pvar(a, a);
 	}
 	double t = af::timer::stop(tm);
 
