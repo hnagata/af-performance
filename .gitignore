@@ -1,2 +1,7 @@
-cuda
-af
+*
+!.gitignore
+!Makefile
+!README.md
+!*.cu
+!*.cxx
+!*.h
