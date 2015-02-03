@@ -6,7 +6,7 @@
 const int GRID_SIZE = 448;
 const int BLOCK_SIZE = 32;
 
-__global__ void sum_dev(double *a, int n, double *b) {
+__global__ void sum_dev(double *a, int n, double *out) {
 	__shared__ double work[BLOCK_SIZE];
 	const int tidx = threadIdx.x;
 	const int bidx = blockIdx.x;
@@ -28,27 +28,24 @@ __global__ void sum_dev(double *a, int n, double *b) {
 	}
 
 	if (tidx == 0) {
-		b[bidx] = work[0] + work[1];
+		out[bidx] = work[0] + work[1];
 	}
 }
 
 double sum(const std::vector<double> &a) {
-	double *a_dev = NULL, *b_dev = NULL;
-	double *b = new double[GRID_SIZE];
+	double *a_dev = NULL;
 	double ans = 0;	
 	CUDA_CALL(cudaMalloc((void**) &a_dev, sizeof(double) * a.size()));
 	CUDA_CALL(cudaMemcpy(
 			a_dev, a.data(), sizeof(double) * a.size(), 
 			cudaMemcpyHostToDevice));
-	CUDA_CALL(cudaMalloc((void**) &b_dev, sizeof(double) * GRID_SIZE));
-	sum_dev<<<GRID_SIZE, BLOCK_SIZE>>>(a_dev, a.size(), b_dev);
+	sum_dev<<<GRID_SIZE, BLOCK_SIZE>>>(a_dev, a.size(), a_dev);
+	CUDA_CHECK();
+	sum_dev<<<1, BLOCK_SIZE>>>(a_dev, GRID_SIZE, a_dev);
 	CUDA_CHECK();
 	CUDA_CALL(cudaMemcpy(
-			b, b_dev, sizeof(double) * GRID_SIZE, cudaMemcpyDeviceToHost));
-	for (int i = 0; i < GRID_SIZE; i++) ans += b[i];
+			&ans, a_dev, sizeof(double), cudaMemcpyDeviceToHost));
 finally:
 	cudaFree(a_dev);
-	cudaFree(b_dev);
-	delete[] b;
 	return ans;
 }
