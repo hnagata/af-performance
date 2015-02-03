@@ -32,11 +32,6 @@ __global__ void sum_dev(double *a, int n, double *b) {
 	}
 }
 
-bool prepare() {
-	cudaSetDevice(0);
-	return true;
-}
-
 double sum(const std::vector<double> &a) {
 	double *a_dev = NULL, *b_dev = NULL;
 	double *b = new double[GRID_SIZE];

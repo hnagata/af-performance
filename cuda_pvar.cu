@@ -122,8 +122,3 @@ finally:
 
 	return ((m - 1) * buf.a_mean[0] + (n - 1) * buf.b_mean[0]) / (m + n - 2);
 }
-
-bool prepare() {
-	cudaSetDevice(0);
-	return true;
-}
