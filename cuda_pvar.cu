@@ -45,7 +45,7 @@ __global__ void err2_dev(double *a, int n, double *mean, double *out) {
 	}
 }
 
-double svar(
+double sqsum(
 	cudaStream_t &stream, 
 	const std::vector<double> &a, double *a_dev, int n, double *work)
 {
@@ -71,7 +71,7 @@ double pvar(const std::vector<double> &a, const std::vector<double> &b) {
 	cudaStream_t a_stream, b_stream;
 	double *a_dev = NULL, *b_dev = NULL;
 	double *a_work = NULL, *b_work = NULL;
-	double a_svar, b_svar, ans;
+	double a_sqsum, b_sqsum, ans;
 	CUDA_CALL(cudaStreamCreate(&a_stream));
 	CUDA_CALL(cudaStreamCreate(&b_stream));
 	CUDA_CALL(cudaMalloc(
@@ -80,9 +80,9 @@ double pvar(const std::vector<double> &a, const std::vector<double> &b) {
 	a_work = b_dev + n;
 	b_work = a_work + GRID_SIZE;
 
-	a_svar = svar(a_stream, a, a_dev, m, a_work);
-	b_svar = svar(b_stream, b, b_dev, n, b_work);
-	ans = (a_svar + b_svar) / (m + n - 2);
+	a_sqsum = sqsum(a_stream, a, a_dev, m, a_work);
+	b_sqsum = sqsum(b_stream, b, b_dev, n, b_work);
+	ans = (a_sqsum + b_sqsum) / (m + n - 2);
 finally:
 	cudaFree(a_dev);
 	cudaStreamDestroy(a_stream);
